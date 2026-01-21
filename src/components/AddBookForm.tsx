@@ -30,11 +30,14 @@ export function AddBookForm({
   const [listenPlatform, setListenPlatform] = useState<ListenPlatform | ''>('');
   const [readFormat, setReadFormat] = useState<ReadFormat | ''>('');
   const [recommendedBy, setRecommendedBy] = useState('');
+  const [completedAt, setCompletedAt] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setStatus(defaultStatus);
+      // Default to today's date for new books
+      setCompletedAt(new Date().toISOString().split('T')[0]);
     }
   }, [isOpen, defaultStatus]);
 
@@ -47,6 +50,7 @@ export function AddBookForm({
     setListenPlatform('');
     setReadFormat('');
     setRecommendedBy('');
+    setCompletedAt(new Date().toISOString().split('T')[0]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,6 +68,9 @@ export function AddBookForm({
         listenPlatform: consumptionType === 'listen' ? (listenPlatform || undefined) : undefined,
         readFormat: consumptionType === 'read' ? (readFormat || undefined) : undefined,
         recommendedBy: recommendedBy.trim() || undefined,
+        completedAt: status === 'have_read' && completedAt
+          ? new Date(completedAt).toISOString()
+          : undefined,
       };
 
       await onSubmit(data);
@@ -238,6 +245,19 @@ export function AddBookForm({
                   </div>
                 </div>
               )}
+
+              {/* Date Completed */}
+              <div>
+                <label className="block text-sm font-medium text-ink-light mb-1">
+                  Date finished
+                </label>
+                <input
+                  type="date"
+                  value={completedAt}
+                  onChange={(e) => setCompletedAt(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-parchment rounded-lg focus:ring-2 focus:ring-leather/30 focus:border-leather text-base bg-white"
+                />
+              </div>
             </>
           )}
 

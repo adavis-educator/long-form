@@ -77,10 +77,13 @@ export function useBooksSupabase(userId: string | null): UseBooksResult {
 
       try {
         const position = getNextPosition(data.status);
+        // Use provided completedAt, or default to now if status is have_read
+        const completedAt = data.completedAt
+          ?? (data.status === 'have_read' ? new Date().toISOString() : null);
         const newBook = {
           ...bookToDbBook({ ...data, userId }),
           position,
-          completed_at: data.status === 'have_read' ? new Date().toISOString() : null,
+          completed_at: completedAt,
         };
 
         const { data: inserted, error: insertError } = await supabase
@@ -107,8 +110,12 @@ export function useBooksSupabase(userId: string | null): UseBooksResult {
       try {
         const updates = bookToDbBook(data);
 
-        // If status changes to have_read, set completed_at
-        if (data.status === 'have_read') {
+        // If completedAt is explicitly provided, use it
+        if (data.completedAt !== undefined) {
+          (updates as Partial<DbBook>).completed_at = data.completedAt || null;
+        }
+        // If status changes to have_read and no completedAt provided, set to now
+        else if (data.status === 'have_read') {
           const currentBook = books.find((b) => b.id === id);
           if (currentBook?.status !== 'have_read') {
             (updates as Partial<DbBook>).completed_at = new Date().toISOString();

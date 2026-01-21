@@ -33,6 +33,7 @@ export interface BookFormData {
   readFormat?: ReadFormat;
   recommendedBy?: string;
   priority?: Priority;
+  completedAt?: string;
 }
 
 export interface DbBook {

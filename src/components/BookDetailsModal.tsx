@@ -33,6 +33,7 @@ export function BookDetailsModal({
   const [listenPlatform, setListenPlatform] = useState<ListenPlatform | ''>('');
   const [readFormat, setReadFormat] = useState<ReadFormat | ''>('');
   const [recommendedBy, setRecommendedBy] = useState('');
+  const [completedAt, setCompletedAt] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -46,6 +47,11 @@ export function BookDetailsModal({
       setListenPlatform(book.listenPlatform || '');
       setReadFormat(book.readFormat || '');
       setRecommendedBy(book.recommendedBy || '');
+      // Convert ISO date to YYYY-MM-DD for input
+      setCompletedAt(book.completedAt
+        ? new Date(book.completedAt).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0]
+      );
     }
   }, [book]);
 
@@ -64,6 +70,9 @@ export function BookDetailsModal({
         listenPlatform: consumptionType === 'listen' ? (listenPlatform || undefined) : undefined,
         readFormat: consumptionType === 'read' ? (readFormat || undefined) : undefined,
         recommendedBy: recommendedBy.trim() || undefined,
+        completedAt: status === 'have_read' && completedAt
+          ? new Date(completedAt).toISOString()
+          : undefined,
       };
 
       await onUpdate(book.id, data);
@@ -246,6 +255,19 @@ export function BookDetailsModal({
                   </div>
                 </div>
               )}
+
+              {/* Date Completed */}
+              <div>
+                <label className="block text-sm font-medium text-ink-light mb-1">
+                  Date finished
+                </label>
+                <input
+                  type="date"
+                  value={completedAt}
+                  onChange={(e) => setCompletedAt(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-parchment rounded-lg focus:ring-2 focus:ring-leather/30 focus:border-leather text-base bg-white"
+                />
+              </div>
             </>
           )}
 
@@ -278,13 +300,6 @@ export function BookDetailsModal({
               placeholder="Any notes about this book..."
             />
           </div>
-
-          {/* Completion Info */}
-          {book.completedAt && (
-            <div className="text-sm text-ink-faint italic">
-              Completed on {new Date(book.completedAt).toLocaleDateString()}
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-2">
