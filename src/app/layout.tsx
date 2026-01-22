@@ -15,13 +15,13 @@ const sourceSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: 'Long Form',
+  title: 'Long Form Circle',
   description: 'For those who still read the whole book',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Long Form',
+    title: 'Long Form Circle',
   },
 };
 

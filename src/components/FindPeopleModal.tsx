@@ -158,7 +158,7 @@ export function FindPeopleModal({
           {/* Tip */}
           <div className="mt-6 p-4 bg-parchment/50 rounded-lg">
             <p className="text-ink-light text-sm">
-              <span className="font-medium">Tip:</span> Ask your friends for their Long Form username so you can add them to your reading circle.
+              <span className="font-medium">Tip:</span> Ask your friends for their Long Form Circle username so you can add them to your reading circle.
             </p>
           </div>
         </div>

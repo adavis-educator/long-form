@@ -9,6 +9,7 @@ import { FindPeopleModal } from '@/components/FindPeopleModal';
 import { CircleManager } from '@/components/CircleManager';
 import { PublicShelfManager } from '@/components/PublicShelfManager';
 import { RequestRecommendationModal } from '@/components/RequestRecommendationModal';
+import { AboutModal } from '@/components/AboutModal';
 import { useProfile } from '@/hooks/useProfile';
 import { useCircle } from '@/hooks/useCircle';
 import { useRecommendations } from '@/hooks/useRecommendations';
@@ -32,6 +33,7 @@ export default function Home() {
   const [showCircle, setShowCircle] = useState(false);
   const [showPublicShelf, setShowPublicShelf] = useState(false);
   const [showRequestRec, setShowRequestRec] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   // Hooks
   const { profile, createProfile, checkUsernameAvailable, findUserByUsername } = useProfile(user?.id ?? null);
@@ -133,7 +135,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center p-4 bg-cream">
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
-            <h1 className="font-serif text-4xl font-bold text-ink mb-2">Long Form</h1>
+            <h1 className="font-serif text-4xl font-bold text-ink mb-2">Long Form Circle</h1>
             <p className="text-ink-light italic">For those who still read the whole book</p>
           </div>
 
@@ -206,7 +208,7 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 bg-cream/95 backdrop-blur-sm border-b border-parchment z-20">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="font-serif text-2xl font-bold text-ink">Long Form</h1>
+          <h1 className="font-serif text-2xl font-bold text-ink">Long Form Circle</h1>
           <div className="flex items-center gap-2">
             {/* Inbox Button */}
             <button
@@ -269,6 +271,15 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                   </svg>
                   Find People
+                </button>
+                <button
+                  onClick={() => setShowAbout(true)}
+                  className="w-full px-4 py-2.5 text-left text-sm text-ink hover:bg-parchment/50 transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4 text-ink-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  About
                 </button>
                 <div className="border-t border-parchment">
                   <button
@@ -351,6 +362,12 @@ export default function Home() {
         onClose={() => setShowRequestRec(false)}
         circleMembers={members}
         onRequest={requestRecommendation}
+      />
+
+      {/* About Modal */}
+      <AboutModal
+        isOpen={showAbout}
+        onClose={() => setShowAbout(false)}
       />
     </main>
   );
