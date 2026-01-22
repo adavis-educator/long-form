@@ -65,21 +65,30 @@ export function useRecommendations(
       // Fetch recommendations I've received
       const { data: incoming, error: inError } = await supabase
         .from('recommendations')
-        .select(`
-          *,
-          from_profile:profiles!recommendations_from_user_id_fkey(*)
-        `)
+        .select('*')
         .eq('to_user_id', userId)
         .order('created_at', { ascending: false });
 
       if (inError) throw inError;
 
+      // Fetch profiles for recommendation senders
+      const recFromUserIds = Array.from(new Set((incoming || []).map((r) => r.from_user_id)));
+      let recFromProfiles: DbProfile[] = [];
+      if (recFromUserIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('user_id', recFromUserIds);
+        recFromProfiles = (profs || []) as DbProfile[];
+      }
+
       setIncomingRecommendations(
         (incoming || []).map((rec) => {
-          const r = rec as DbRecommendation & { from_profile: DbProfile };
+          const r = rec as DbRecommendation;
+          const fromProfile = recFromProfiles.find((p) => p.user_id === r.from_user_id);
           return {
             ...dbRecommendationToRecommendation(r),
-            fromProfile: r.from_profile ? dbProfileToProfile(r.from_profile) : undefined,
+            fromProfile: fromProfile ? dbProfileToProfile(fromProfile) : undefined,
           };
         })
       );
@@ -103,10 +112,7 @@ export function useRecommendations(
       // Requests directed specifically to me
       const { data: directRequests, error: directError } = await supabase
         .from('recommendation_requests')
-        .select(`
-          *,
-          from_profile:profiles!recommendation_requests_from_user_id_fkey(*)
-        `)
+        .select('*')
         .eq('to_user_id', userId)
         .eq('status', 'open')
         .order('created_at', { ascending: false });
@@ -114,60 +120,68 @@ export function useRecommendations(
       if (directError) throw directError;
 
       // Requests to full circle from my circle members
-      let circleRequests: RecommendationRequest[] = [];
+      let broadcastRequests: DbRecommendationRequest[] = [];
       if (circleMemberIds.length > 0) {
-        const { data: broadcastRequests, error: broadcastError } = await supabase
+        const { data: broadcast, error: broadcastError } = await supabase
           .from('recommendation_requests')
-          .select(`
-            *,
-            from_profile:profiles!recommendation_requests_from_user_id_fkey(*)
-          `)
+          .select('*')
           .is('to_user_id', null)
           .in('from_user_id', circleMemberIds)
           .eq('status', 'open')
           .order('created_at', { ascending: false });
 
         if (broadcastError) throw broadcastError;
-
-        circleRequests = (broadcastRequests || []).map((req) => {
-          const r = req as DbRecommendationRequest & { from_profile: DbProfile };
-          return {
-            ...dbRequestToRequest(r),
-            fromProfile: r.from_profile ? dbProfileToProfile(r.from_profile) : undefined,
-          };
-        });
+        broadcastRequests = (broadcast || []) as DbRecommendationRequest[];
       }
 
-      const allIncomingRequests = [
-        ...(directRequests || []).map((req) => {
-          const r = req as DbRecommendationRequest & { from_profile: DbProfile };
-          return {
-            ...dbRequestToRequest(r),
-            fromProfile: r.from_profile ? dbProfileToProfile(r.from_profile) : undefined,
-          };
-        }),
-        ...circleRequests,
-      ];
+      // Get all unique from_user_ids to fetch profiles
+      const allRequests = [...(directRequests || []), ...broadcastRequests] as DbRecommendationRequest[];
+      const reqFromUserIds = Array.from(new Set(allRequests.map((r) => r.from_user_id)));
+      let reqFromProfiles: DbProfile[] = [];
+      if (reqFromUserIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('user_id', reqFromUserIds);
+        reqFromProfiles = (profs || []) as DbProfile[];
+      }
+
+      const allIncomingRequests = allRequests.map((req) => {
+        const fromProfile = reqFromProfiles.find((p) => p.user_id === req.from_user_id);
+        return {
+          ...dbRequestToRequest(req),
+          fromProfile: fromProfile ? dbProfileToProfile(fromProfile) : undefined,
+        };
+      });
       setIncomingRequests(allIncomingRequests);
 
       // Fetch my own requests
       const { data: mine, error: mineError } = await supabase
         .from('recommendation_requests')
-        .select(`
-          *,
-          to_profile:profiles!recommendation_requests_to_user_id_fkey(*)
-        `)
+        .select('*')
         .eq('from_user_id', userId)
         .order('created_at', { ascending: false });
 
       if (mineError) throw mineError;
 
+      // Fetch profiles for request recipients
+      const reqToUserIds = Array.from(new Set((mine || []).filter((r) => r.to_user_id).map((r) => r.to_user_id)));
+      let reqToProfiles: DbProfile[] = [];
+      if (reqToUserIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('user_id', reqToUserIds);
+        reqToProfiles = (profs || []) as DbProfile[];
+      }
+
       setMyRequests(
         (mine || []).map((req) => {
-          const r = req as DbRecommendationRequest & { to_profile: DbProfile | null };
+          const r = req as DbRecommendationRequest;
+          const toProfile = r.to_user_id ? reqToProfiles.find((p) => p.user_id === r.to_user_id) : undefined;
           return {
             ...dbRequestToRequest(r),
-            toProfile: r.to_profile ? dbProfileToProfile(r.to_profile) : undefined,
+            toProfile: toProfile ? dbProfileToProfile(toProfile) : undefined,
           };
         })
       );

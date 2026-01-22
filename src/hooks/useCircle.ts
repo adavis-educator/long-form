@@ -77,21 +77,30 @@ export function useCircle(userId: string | null): UseCircleResult {
       // Fetch pending invites I've received
       const { data: received, error: recError } = await supabase
         .from('circle_invites')
-        .select(`
-          *,
-          from_profile:profiles!circle_invites_from_user_id_fkey(*)
-        `)
+        .select('*')
         .eq('to_user_id', userId)
         .eq('status', 'pending');
 
       if (recError) throw recError;
 
+      // Fetch profiles for invite senders
+      const fromUserIds = (received || []).map((inv) => inv.from_user_id);
+      let fromProfiles: DbProfile[] = [];
+      if (fromUserIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('user_id', fromUserIds);
+        fromProfiles = (profs || []) as DbProfile[];
+      }
+
       setPendingInvites(
         (received || []).map((inv) => {
-          const invite = inv as DbCircleInvite & { from_profile: DbProfile };
+          const invite = inv as DbCircleInvite;
+          const fromProfile = fromProfiles.find((p) => p.user_id === invite.from_user_id);
           return {
             ...dbCircleInviteToCircleInvite(invite),
-            fromProfile: invite.from_profile ? dbProfileToProfile(invite.from_profile) : undefined,
+            fromProfile: fromProfile ? dbProfileToProfile(fromProfile) : undefined,
           };
         })
       );
@@ -99,21 +108,30 @@ export function useCircle(userId: string | null): UseCircleResult {
       // Fetch invites I've sent that are still pending
       const { data: sent, error: sentError } = await supabase
         .from('circle_invites')
-        .select(`
-          *,
-          to_profile:profiles!circle_invites_to_user_id_fkey(*)
-        `)
+        .select('*')
         .eq('from_user_id', userId)
         .eq('status', 'pending');
 
       if (sentError) throw sentError;
 
+      // Fetch profiles for invite recipients
+      const toUserIds = (sent || []).map((inv) => inv.to_user_id);
+      let toProfiles: DbProfile[] = [];
+      if (toUserIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('user_id', toUserIds);
+        toProfiles = (profs || []) as DbProfile[];
+      }
+
       setSentInvites(
         (sent || []).map((inv) => {
-          const invite = inv as DbCircleInvite & { to_profile: DbProfile };
+          const invite = inv as DbCircleInvite;
+          const toProfile = toProfiles.find((p) => p.user_id === invite.to_user_id);
           return {
             ...dbCircleInviteToCircleInvite(invite),
-            toProfile: invite.to_profile ? dbProfileToProfile(invite.to_profile) : undefined,
+            toProfile: toProfile ? dbProfileToProfile(toProfile) : undefined,
           };
         })
       );
