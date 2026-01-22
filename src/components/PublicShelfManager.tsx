@@ -7,7 +7,7 @@ interface PublicShelfManagerProps {
   isOpen: boolean;
   onClose: () => void;
   shelfItems: PublicShelfItem[];
-  wantToReadBooks: Book[];
+  haveReadBooks: Book[];
   onAddToShelf: (bookId: string, position: number) => Promise<boolean>;
   onRemoveFromShelf: (bookId: string) => Promise<boolean>;
 }
@@ -16,7 +16,7 @@ export function PublicShelfManager({
   isOpen,
   onClose,
   shelfItems,
-  wantToReadBooks,
+  haveReadBooks,
   onAddToShelf,
   onRemoveFromShelf,
 }: PublicShelfManagerProps) {
@@ -34,7 +34,7 @@ export function PublicShelfManager({
   });
 
   // Get books not already on shelf
-  const availableBooks = wantToReadBooks.filter(
+  const availableBooks = haveReadBooks.filter(
     (book) => !shelfItems.some((item) => item.bookId === book.id)
   );
 
@@ -98,7 +98,7 @@ export function PublicShelfManager({
                 <div className="text-center py-8">
                   <p className="text-ink-light">No more books to add</p>
                   <p className="text-ink-faint text-sm mt-1">
-                    Add books to your &quot;Want to Read&quot; list first
+                    Mark some books as &quot;Have Read&quot; first
                   </p>
                 </div>
               ) : (
@@ -121,7 +121,7 @@ export function PublicShelfManager({
             // Shelf View Mode
             <>
               <p className="text-ink-light text-sm mb-4">
-                Choose up to 5 books from your &quot;Want to Read&quot; list to show others. This helps friends know what to recommend.
+                Choose up to 5 books from your &quot;Have Read&quot; list to show others. This helps friends understand your taste.
               </p>
 
               <div className="space-y-3">
@@ -153,7 +153,7 @@ export function PublicShelfManager({
                     ) : (
                       <button
                         onClick={() => setSelectingForSlot(slot.position)}
-                        disabled={processing || wantToReadBooks.length === 0}
+                        disabled={processing || haveReadBooks.length === 0}
                         className="flex-1 border-2 border-dashed border-parchment rounded-lg p-3 text-ink-faint hover:border-leather hover:text-leather transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span className="text-sm">+ Add a book</span>
@@ -163,10 +163,10 @@ export function PublicShelfManager({
                 ))}
               </div>
 
-              {wantToReadBooks.length === 0 && (
+              {haveReadBooks.length === 0 && (
                 <div className="mt-4 p-4 bg-parchment/50 rounded-lg">
                   <p className="text-ink-light text-sm">
-                    <span className="font-medium">Tip:</span> Add books to your &quot;Want to Read&quot; list first, then you can feature them on your public shelf.
+                    <span className="font-medium">Tip:</span> Mark some books as &quot;Have Read&quot; first, then you can feature them on your public shelf.
                   </p>
                 </div>
               )}

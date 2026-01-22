@@ -47,7 +47,7 @@ export default function Home() {
   const { shelfItems, addToShelf, removeFromShelf } = usePublicShelf(user?.id ?? null);
   const { getBooksByStatus, addBook } = useBooksSupabase(user?.id ?? null);
 
-  const wantToReadBooks = getBooksByStatus('want_to_read');
+  const haveReadBooks = getBooksByStatus('have_read');
 
   // Calculate unread counts
   const pendingRecs = incomingRecommendations.filter((r) => r.status === 'pending');
@@ -340,7 +340,7 @@ export default function Home() {
         isOpen={showPublicShelf}
         onClose={() => setShowPublicShelf(false)}
         shelfItems={shelfItems}
-        wantToReadBooks={wantToReadBooks}
+        haveReadBooks={haveReadBooks}
         onAddToShelf={addToShelf}
         onRemoveFromShelf={removeFromShelf}
       />
