@@ -156,11 +156,30 @@ export function ReadingBoard({ userId, circleMembers = [], onSendRecommendation 
       {/* Floating Action Button */}
       <button
         onClick={() => handleOpenAddForm()}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-leather text-white rounded-full shadow-lg hover:bg-leather-light active:scale-95 transition-all flex items-center justify-center z-30"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-leather text-white rounded-2xl shadow-lg hover:bg-leather-light active:scale-95 transition-all flex items-center justify-center z-30"
         aria-label="Add book"
       >
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          {/* Book shape */}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 19.5A2.5 2.5 0 016.5 17H20"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"
+          />
+          {/* Plus sign */}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8v6m3-3H9"
+          />
         </svg>
       </button>
 
