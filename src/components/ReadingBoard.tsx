@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
-import { Book, BookStatus, BookFormData } from '@/types';
+import { Book, BookStatus, BookFormData, CircleMember } from '@/types';
 import { useBooksSupabase } from '@/hooks/useBooksSupabase';
 import { CurrentlyReadingSection } from './sections/CurrentlyReadingSection';
 import { WantToReadSection } from './sections/WantToReadSection';
@@ -10,12 +10,15 @@ import { HaveReadSection } from './sections/HaveReadSection';
 import { AddBookForm } from './AddBookForm';
 import { BookDetailsModal } from './BookDetailsModal';
 import { ReadingStats } from './ReadingStats';
+import { RecommendBookModal } from './RecommendBookModal';
 
 interface ReadingBoardProps {
   userId: string;
+  circleMembers?: CircleMember[];
+  onSendRecommendation?: (toUserId: string, bookTitle: string, bookAuthor: string, note?: string) => Promise<boolean>;
 }
 
-export function ReadingBoard({ userId }: ReadingBoardProps) {
+export function ReadingBoard({ userId, circleMembers = [], onSendRecommendation }: ReadingBoardProps) {
   const {
     books,
     loading,
@@ -33,6 +36,7 @@ export function ReadingBoard({ userId }: ReadingBoardProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<BookStatus>('want_to_read');
+  const [recommendBook, setRecommendBook] = useState<Book | null>(null);
 
   const currentlyReading = getBooksByStatus('currently_reading');
   const wantToRead = getBooksByStatus('want_to_read');
@@ -144,6 +148,7 @@ export function ReadingBoard({ userId }: ReadingBoardProps) {
           <HaveReadSection
             books={haveRead}
             onBookClick={handleBookClick}
+            onRecommend={circleMembers.length > 0 ? setRecommendBook : undefined}
           />
         </div>
       </DragDropContext>
@@ -175,6 +180,17 @@ export function ReadingBoard({ userId }: ReadingBoardProps) {
         onUpdate={handleUpdateBook}
         onDelete={handleDeleteBook}
       />
+
+      {/* Recommend Book Modal */}
+      {onSendRecommendation && (
+        <RecommendBookModal
+          isOpen={!!recommendBook}
+          onClose={() => setRecommendBook(null)}
+          book={recommendBook}
+          circleMembers={circleMembers}
+          onSend={onSendRecommendation}
+        />
+      )}
     </>
   );
 }

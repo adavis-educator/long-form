@@ -8,9 +8,10 @@ import { BookCard } from '../BookCard';
 interface HaveReadSectionProps {
   books: Book[];
   onBookClick: (book: Book) => void;
+  onRecommend?: (book: Book) => void;
 }
 
-export function HaveReadSection({ books, onBookClick }: HaveReadSectionProps) {
+export function HaveReadSection({ books, onBookClick, onRecommend }: HaveReadSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -53,14 +54,27 @@ export function HaveReadSection({ books, onBookClick }: HaveReadSectionProps) {
             ) : (
               <div className="space-y-2">
                 {books.map((book, index) => (
-                  <BookCard
-                    key={book.id}
-                    book={book}
-                    index={index}
-                    onClick={() => onBookClick(book)}
-                    showConsumptionInfo
-                    compact={!isExpanded}
-                  />
+                  <div key={book.id} className="relative group">
+                    <BookCard
+                      book={book}
+                      index={index}
+                      onClick={() => onBookClick(book)}
+                      showConsumptionInfo
+                      compact={!isExpanded}
+                    />
+                    {onRecommend && isExpanded && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRecommend(book);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 px-2 py-1 bg-leather text-white text-xs font-medium rounded transition-opacity"
+                        title="Recommend to someone"
+                      >
+                        Recommend
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
             )}

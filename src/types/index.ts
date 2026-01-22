@@ -95,3 +95,218 @@ export function bookToDbBook(book: Partial<Book> & { userId?: string }): Partial
 
   return dbBook;
 }
+
+// =============================================
+// SOCIAL FEATURES - TYPES
+// =============================================
+
+export type InviteStatus = 'pending' | 'accepted' | 'declined';
+export type RecommendationStatus = 'pending' | 'added' | 'dismissed';
+export type RequestStatus = 'open' | 'fulfilled' | 'closed';
+
+// Profile
+export interface Profile {
+  id: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DbProfile {
+  id: string;
+  user_id: string;
+  username: string;
+  display_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function dbProfileToProfile(db: DbProfile): Profile {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    username: db.username,
+    displayName: db.display_name,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+  };
+}
+
+// Circle Invite
+export interface CircleInvite {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  status: InviteStatus;
+  createdAt: string;
+  updatedAt: string;
+  // Joined fields
+  fromProfile?: Profile;
+  toProfile?: Profile;
+}
+
+export interface DbCircleInvite {
+  id: string;
+  from_user_id: string;
+  to_user_id: string;
+  status: InviteStatus;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  from_profile?: DbProfile;
+  to_profile?: DbProfile;
+}
+
+export function dbCircleInviteToCircleInvite(db: DbCircleInvite): CircleInvite {
+  return {
+    id: db.id,
+    fromUserId: db.from_user_id,
+    toUserId: db.to_user_id,
+    status: db.status,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    fromProfile: db.from_profile ? dbProfileToProfile(db.from_profile) : undefined,
+    toProfile: db.to_profile ? dbProfileToProfile(db.to_profile) : undefined,
+  };
+}
+
+// Connection (circle member)
+export interface Connection {
+  id: string;
+  userAId: string;
+  userBId: string;
+  createdAt: string;
+  // The other user's profile (computed based on current user)
+  profile?: Profile;
+}
+
+export interface DbConnection {
+  id: string;
+  user_a_id: string;
+  user_b_id: string;
+  created_at: string;
+}
+
+// Circle Member (simplified view of a connection)
+export interface CircleMember {
+  userId: string;
+  username: string;
+  displayName: string;
+}
+
+// Public Shelf Item
+export interface PublicShelfItem {
+  id: string;
+  userId: string;
+  bookId: string;
+  position: number;
+  createdAt: string;
+  book?: Book;
+}
+
+export interface DbPublicShelfItem {
+  id: string;
+  user_id: string;
+  book_id: string;
+  position: number;
+  created_at: string;
+  books?: DbBook;
+}
+
+export function dbPublicShelfItemToPublicShelfItem(db: DbPublicShelfItem): PublicShelfItem {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    bookId: db.book_id,
+    position: db.position,
+    createdAt: db.created_at,
+    book: db.books ? dbBookToBook(db.books) : undefined,
+  };
+}
+
+// Recommendation
+export interface Recommendation {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  bookTitle: string;
+  bookAuthor: string;
+  note?: string;
+  status: RecommendationStatus;
+  createdAt: string;
+  updatedAt: string;
+  // Joined fields
+  fromProfile?: Profile;
+}
+
+export interface DbRecommendation {
+  id: string;
+  from_user_id: string;
+  to_user_id: string;
+  book_title: string;
+  book_author: string;
+  note: string | null;
+  status: RecommendationStatus;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  from_profile?: DbProfile;
+}
+
+export function dbRecommendationToRecommendation(db: DbRecommendation): Recommendation {
+  return {
+    id: db.id,
+    fromUserId: db.from_user_id,
+    toUserId: db.to_user_id,
+    bookTitle: db.book_title,
+    bookAuthor: db.book_author,
+    note: db.note ?? undefined,
+    status: db.status,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    fromProfile: db.from_profile ? dbProfileToProfile(db.from_profile) : undefined,
+  };
+}
+
+// Recommendation Request
+export interface RecommendationRequest {
+  id: string;
+  fromUserId: string;
+  toUserId?: string; // null = asking full circle
+  note?: string;
+  status: RequestStatus;
+  createdAt: string;
+  updatedAt: string;
+  // Joined fields
+  fromProfile?: Profile;
+  toProfile?: Profile;
+}
+
+export interface DbRecommendationRequest {
+  id: string;
+  from_user_id: string;
+  to_user_id: string | null;
+  note: string | null;
+  status: RequestStatus;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  from_profile?: DbProfile;
+  to_profile?: DbProfile;
+}
+
+export function dbRequestToRequest(db: DbRecommendationRequest): RecommendationRequest {
+  return {
+    id: db.id,
+    fromUserId: db.from_user_id,
+    toUserId: db.to_user_id ?? undefined,
+    note: db.note ?? undefined,
+    status: db.status,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    fromProfile: db.from_profile ? dbProfileToProfile(db.from_profile) : undefined,
+    toProfile: db.to_profile ? dbProfileToProfile(db.to_profile) : undefined,
+  };
+}
