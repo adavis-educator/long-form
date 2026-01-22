@@ -26,6 +26,7 @@ export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
 
   // Modal states
   const [showInbox, setShowInbox] = useState(false);
@@ -83,6 +84,8 @@ export default function Home() {
           password,
         });
         if (error) throw error;
+        setSignUpSuccess(true);
+        return;
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -131,6 +134,41 @@ export default function Home() {
   }
 
   if (!user) {
+    // Show success message after sign up
+    if (signUpSuccess) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-cream">
+          <div className="w-full max-w-sm">
+            <div className="text-center mb-8">
+              <h1 className="font-serif text-4xl font-bold text-ink mb-2">Long Form Circle</h1>
+              <p className="text-ink-light italic">For those who still read the whole book</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-parchment p-6 text-center">
+              <div className="w-16 h-16 bg-forest/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h2 className="font-serif text-xl text-ink mb-2">Check your email</h2>
+              <p className="text-ink-light mb-4">
+                We sent a confirmation link to <strong>{email}</strong>. Click the link in that email to finish signing up.
+              </p>
+              <button
+                onClick={() => {
+                  setSignUpSuccess(false);
+                  setIsSignUp(false);
+                }}
+                className="text-sm text-leather hover:text-leather-light"
+              >
+                Back to sign in
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-cream">
         <div className="w-full max-w-sm">

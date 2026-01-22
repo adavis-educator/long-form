@@ -75,7 +75,7 @@ export function ProfileSetup({
             </div>
             <h2 className="font-serif text-2xl text-ink mb-2">Set Up Your Profile</h2>
             <p className="text-ink-light text-sm">
-              Create a username so your reading circle can find you and share recommendations.
+              Your username is how friends will find you and invite you to their reading circle. Share it with people you want to exchange book recommendations with.
             </p>
           </div>
 
